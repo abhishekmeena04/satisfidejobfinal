@@ -24,6 +24,7 @@ app.use(cookieparser());
 const allowedOrigins = [
 	'https://demoto.vercel.app',
 	'https://satisfiedjob.com',
+	'http://satisfiedjob.com',
 	'http://localhost:3000',
 ];
 
