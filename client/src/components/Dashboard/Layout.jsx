@@ -47,9 +47,13 @@ const Layout = ({ children, setTab, tab }) => {
     dispatch(currentEmployee());
   }, []);
 
-  function handelLogout() {
-    dispatch(logoutEmployee());
-    router.push("/");
+  const handelLogout = async () => {
+    const response = await dispatch(logoutEmployee());
+    if(response == "Signout Employer"){
+      router.push("/");
+    } else{
+      toast.error(response);
+    }
   }
 
   useEffect(() => {
@@ -81,7 +85,7 @@ const Layout = ({ children, setTab, tab }) => {
     <div>
       <div className="main">
         <div className="dashboard">
-          <div className="sidebar" ref={sidebar}>
+          <div className="sidebar z-50 " ref={sidebar}>
             <RxCross1
               className=" absolute right-3 top-3 block  md:hidden  "
               onClick={handleClick}
@@ -171,7 +175,7 @@ const Layout = ({ children, setTab, tab }) => {
                   onClick={handelLogout}
                 >
                   <MdLogout /> Logout
-                </h3>
+              </h3>
             </div>
             <div className="social-links flex gap-5">
               <h5>
