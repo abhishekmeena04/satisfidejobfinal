@@ -35,7 +35,7 @@ const Header = () => {
   function handelLogout() {
     dispatch(logoutStudent());
     dispatch(logoutEmployee());
-    router.push("/");
+    // router.push("/");
   }
 
   useEffect(() => {
