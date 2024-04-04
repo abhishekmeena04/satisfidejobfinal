@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import React, { useEffect, useRef } from "react";
 import { CgProfile } from "react-icons/cg";
@@ -50,7 +51,7 @@ const Layout = ({ children, setTab, tab }) => {
   const handelLogout = async () => {
     const response = await dispatch(logoutEmployee());
     if(response == "Signout Employer"){
-      router.push("/");
+      // router.reload()
     } else{
       toast.error(response);
     }
