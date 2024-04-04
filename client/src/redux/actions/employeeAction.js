@@ -153,10 +153,15 @@ export const AddCompanydetails = (userData) => async (dispatch) => {
 export const logoutEmployee = (userData) => async (dispatch) => {
     try {
         dispatch(setLoading(true));
-        const data = await axios.get(`${basePath}/signout`, config());
+        const response = await axios.get(`${basePath}/signout`, config());
         dispatch(setLoading(false));
         dispatch(setEmployee(null))
-        localStorage.removeItem("token")
+        if(response.data.message == "Signout Employer done!"){
+            localStorage.removeItem("token")
+            return "Signout Employer"
+        } else{
+            return response.data.message
+        }
     } catch (error) {
         dispatch(setLoading(false));
         dispatch(setError(error?.response?.data?.message || "Register failed"));

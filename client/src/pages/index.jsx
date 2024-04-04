@@ -486,7 +486,7 @@ export default function Home() {
                 <div
                   key={e._id}
                   onClick={() => onJobClick(e._id)}
-                  className="w-[250px] md:w-[300px] flex-shrink-0 h-[230px] py-[25px] md:py-[25px] px-[10px] md:px-[20px]  ml-[30px] rounded-lg border-gray-50 hover:border-gray-200  hover:shadow-md border border-slate-300 "
+                  className="w-[250px] md:w-[300px] flex-shrink-0 h-[230px] py-[25px] md:py-[25px] px-[10px] md:px-[20px]  ml-[30px] rounded-lg border-gray-50 hover:border-gray-200  hover:shadow-md border border-slate-300 overflow-hidden "
                 >
                   <div className="flex gap-4 pb-1   ">
                     <img
