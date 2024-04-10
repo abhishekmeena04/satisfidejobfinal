@@ -12,10 +12,11 @@ import { FaFacebookSquare } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { IoLogoInstagram } from "react-icons/io5";
 import { FaLinkedin } from "react-icons/fa";
+import Loading from "./Loading";
 const LoginUser = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { student, error } = useSelector((state) => state.student);
+  const { student, error,loading } = useSelector((state) => state.student);
 
   const {
     register,
@@ -43,6 +44,7 @@ const LoginUser = () => {
 
   return (
     <div className="flex relative">
+    {/* {loading && <Loading className="w-[100vw] h-full absolute top-0 left-0" />} */}
       <Link
         href="/"
         className="absolute top-2  left-2 md:left-4 md:top-2  text-white flex items-center  cursor-pointer justify-center"

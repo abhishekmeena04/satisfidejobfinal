@@ -21,7 +21,9 @@ const {
 	findTopCompony,
 	findrecentCompony,
 	findTopComponyJobs,
-	activateStudnet
+	activateStudnet,
+	studentsendmailOtp,
+	studentforgetlinkCode
 } = require('../controllers/indexControllers');
 const { isAuthenticated } = require('../middlewares/auth');
 const router = express.Router();
@@ -60,6 +62,12 @@ router.post('/student/send-mail', studentsendmail);
 
 // GET /student/forget-link/:studentId
 router.post('/student/forget-link/:id', studentforgetlink);
+
+// GET /student/forget-link/:studentId
+router.post('/student/forget-password/email', studentsendmailOtp);
+
+// GET /student/forget-link/:studentId
+router.post('/student/forget-password/code', studentforgetlinkCode);
 
 // POST /student/reset-password/:studentId
 router.post(
