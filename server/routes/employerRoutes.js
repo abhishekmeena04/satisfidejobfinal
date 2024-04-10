@@ -33,7 +33,6 @@ const {
 const { isAuthenticated } = require('../middlewares/auth');
 const { isAdmin } = require('../middlewares/adminAuth');
 const { SerchJobs, activateEmployer } = require('../controllers/indexControllers');
-
 const router = express.Router();
 
 // GET /

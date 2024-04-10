@@ -13,7 +13,6 @@ const Student = require("../models/studentModel");
 const activationToken = require("../utils/activationToken");
 const sendmailActication = require("../utils/sendmail");
 const jwt = require('jsonwebtoken');
-const activationToken = require("../utils/activationToken");
 const sendmailActication = require("../utils/sendmail");
 
 const cloudinary = require("cloudinary").v2;
