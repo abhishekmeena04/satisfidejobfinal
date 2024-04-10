@@ -1,142 +1,148 @@
-const { catchAsyncError } = require('../middlewares/catchAsyncError');
-const Student = require('../models/studentModel');
-const Internship = require('../models/internshipModel');
-const Job = require('../models/jobModel');
-const ErrorHandler = require('../utils/ErrorHandlers');
-const { sendtoken } = require('../utils/SendToken');
-const { sendmail } = require('../utils/nodemailer');
-const path = require('path');
-const JobApplication = require('../models/jobApplicationModel');
-const Employer = require('../models/employerModel'); 
-const jwt = require('jsonwebtoken');
+const { catchAsyncError } = require("../middlewares/catchAsyncError");
+const Student = require("../models/studentModel");
+const Internship = require("../models/internshipModel");
+const Job = require("../models/jobModel");
+const ErrorHandler = require("../utils/ErrorHandlers");
+const { sendtoken } = require("../utils/SendToken");
+const { sendmail } = require("../utils/nodemailer");
+const path = require("path");
+const JobApplication = require("../models/jobApplicationModel");
+const Employer = require("../models/employerModel");
+const jwt = require("jsonwebtoken");
 
 const cloudinary = require("cloudinary").v2;
 
-const { json } = require('express');
-const activationToken = require('../utils/activationToken');
-const sendmailActication = require('../utils/sendmail');
+const { json } = require("express");
+const activationToken = require("../utils/activationToken");
+const sendmailActication = require("../utils/sendmail");
 
 cloudinary.config({
-	cloud_name: 'dcj2gzytt',
-	api_key: process.env.CLOUDINARY_PUBLIC_KEY,
-	api_secret: process.env.CLOUDINARY_SECRET_KEY
+  cloud_name: "dcj2gzytt",
+  api_key: process.env.CLOUDINARY_PUBLIC_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET_KEY,
 });
 
 exports.homepage = catchAsyncError((req, res, next) => {
-	res.json({ message: 'Homepage of Internshala' });
+  res.json({ message: "Homepage of Internshala" });
 });
 
 exports.currentstudent = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findById(req.id).exec();
-	res.json({ student });
+  const student = await Student.findById(req.id).exec();
+  res.json({ student });
 });
 
 exports.studentsignup = catchAsyncError(async (req, res, next) => {
-	const { email , password , contact , city, name} = req.body;
+  const { email, password, contact, city, name } = req.body;
 
-	const studentcurrent = {
-		name,
-		email,
-		contact,
-		city,
-		password
-	}
+  const studentcurrent = {
+    name,
+    email,
+    contact,
+    city,
+    password,
+  };
 
-	const ActivationCode = Math.floor(1000 + Math.random() * 9000);
-	console.log(ActivationCode)
+  const ActivationCode = Math.floor(1000 + Math.random() * 9000);
+  console.log(ActivationCode);
 
-	const data = { name: name, activationCode: ActivationCode };
-	console.log(data)
+  const data = { name: name, activationCode: ActivationCode };
+  console.log(data);
 
-	try {
-		await sendmailActication(
-		  res,
-		  next,
-		  email,
-		  "Verification code",
-		  "activationMail.ejs",
-		  data
-		);
-		let token = await activationToken(studentcurrent, ActivationCode);
-		let options = {
-		  httpOnly: true,
-		  secure: true,
-		};
-		res.status(200).cookie("token", token, options).json({
-		  succcess: true,
-		  message: "successfully send mail pleas check your Mail",
-		  Token: token,
-		});
-	} catch (error) {
-		return next(new ErrorHandler(error.message, 400));
-	}
+  try {
+    await sendmailActication(
+      res,
+      next,
+      email,
+      "Verification code",
+      "activationMail.ejs",
+      data
+    );
+    let token = await activationToken(studentcurrent, ActivationCode);
+    let options = {
+      httpOnly: true,
+      secure: true,
+    };
+    res.status(200).cookie("token", token, options).json({
+      succcess: true,
+      message: "successfully send mail pleas check your Mail",
+      Token: token,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
 
-	// const student = await new Student(req.body).save();
+  // const student = await new Student(req.body).save();
 
-	
-	// res.status(201).json({ studentcurrent });
+  // res.status(201).json({ studentcurrent });
 });
 
 exports.activateStudnet = catchAsyncError(async (req, res, next) => {
-	let { activationCode } = req.body;
+  let { activationCode } = req.body;
 
-	if (!activationCode) return next(new ErrorHandler("Provide Activation Code"));
+  if (!activationCode) return next(new ErrorHandler("Provide Activation Code"));
 
-	// const token = req.cookies || req.headers.authorization;
-	const token = req.headers.authorization;
-	const {user,ActivationCode} = await jwt.verify(token,process.env.JWT_TOKEN_SECRET);
+  // const token = req.cookies || req.headers.authorization;
+  const token = req.headers.authorization;
+  const { user, ActivationCode } = await jwt.verify(
+    token,
+    process.env.JWT_TOKEN_SECRET
+  );
 
-	console.log(user)
+  console.log(user);
 
-	if (!user) return next(new ErrorHandler("Invelide Token"));
-	const isEmailExit = await Student.findOne({ email: user.email });
-	console.log(isEmailExit)
+  if (!user) return next(new ErrorHandler("Invelide Token"));
+  const isEmailExit = await Student.findOne({ email: user.email });
+  console.log(isEmailExit);
 
   if (isEmailExit)
-    return next(new ErrorHandler("User With This Email Address Already Exits",401));
+    return next(
+      new ErrorHandler("User With This Email Address Already Exits", 401)
+    );
 
-	if (activationCode != ActivationCode)
-    return res.status(401).json({massage:"Wrong Activation Code"});
+  if (activationCode != ActivationCode)
+    return res.status(401).json({ massage: "Wrong Activation Code" });
 
-  let { name, email, password, contact, city } =
-    user;
-	const newStudent = await Student.create({
-		name,
-		email,
-		contact,
-		city,
-		password
-	})
-	sendtoken(newStudent, 200, res, req);
-
+  let { name, email, password, contact, city } = user;
+  const newStudent = await Student.create({
+    name,
+    email,
+    contact,
+    city,
+    password,
+  });
+  sendtoken(newStudent, 200, res, req);
 });
 
 exports.studentsignin = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findOne({ email: req.body.email })
-		.select('+password')
-		.exec();
+  const student = await Student.findOne({ email: req.body.email })
+    .select("+password")
+    .exec();
 
-	if (!student) {
-		return next(
-			new ErrorHandler('User not found with this Email Address', 404)
-		);
-	}
-	const isMatch = student.comparepassword(req.body.password);
-	if (!isMatch) return next(new ErrorHandler('Wrong Credientials', 500));
+  if (!student) {
+    return next(
+      new ErrorHandler("User not found with this Email Address", 404)
+    );
+  }
+  const isMatch = student.comparepassword(req.body.password);
+  if (!isMatch) return next(new ErrorHandler("Wrong Credientials", 500));
 
-	sendtoken(student, 200, res, req);
+  sendtoken(student, 200, res, req);
 });
 
 exports.studentsignout = catchAsyncError(async (req, res, next) => {
-	res.clearCookie('token');
-	res.json({ message: 'Signout User!' });
+  res.clearCookie("token");
+  res.json({ message: "Signout User!" });
 });
 
 exports.studentUpdate = catchAsyncError(async (req, res, next) => {
-	await Student.findByIdAndUpdate(req.id, req.body).exec();
-	res
-		.status(200)
-		.json({ success: true, student: Student, message: 'Student Updated Successfully!' });
+  await Student.findByIdAndUpdate(req.id, req.body).exec();
+  res
+    .status(200)
+    .json({
+      success: true,
+      student: Student,
+      message: "Student Updated Successfully!",
+    });
 });
 
 // exports.studentAvatar = catchAsyncError(async (req, res, next) => {
@@ -190,129 +196,229 @@ exports.studentUpdate = catchAsyncError(async (req, res, next) => {
 // });
 
 exports.studentAvatar = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findById(req.id).exec();
+  const student = await Student.findById(req.id).exec();
 
-	// Check if req.files and req.files.resuma are defined
-	if (req.files && req.files.avatar) {
-		const file = req.files.avatar;
-		const modifiedName = `internshala-${Date.now()}${path.extname(file.name)}`;
+  // Check if req.files and req.files.resuma are defined
+  if (req.files && req.files.avatar) {
+    const file = req.files.avatar;
+    const modifiedName = `internshala-${Date.now()}${path.extname(file.name)}`;
 
-		if (student.avatar.fileId !== '') {
-			await cloudinary.uploader.destroy(student.avatar.fileId, (error, result) => {
-				if (error) {
-					console.error('Error deleting file from Cloudinary:', error);
-				} else {
-					console.log('File deleted successfully:', result);
-				}
-			});
-		}
-		const filepath = req.files.avatar;
-		const myavatar = await cloudinary.uploader.upload(filepath.tempFilePath, {
-			folder: "avaters",
-		});
+    if (student.avatar.fileId !== "") {
+      await cloudinary.uploader.destroy(
+        student.avatar.fileId,
+        (error, result) => {
+          if (error) {
+            console.error("Error deleting file from Cloudinary:", error);
+          } else {
+            console.log("File deleted successfully:", result);
+          }
+        }
+      );
+    }
+    const filepath = req.files.avatar;
+    const myavatar = await cloudinary.uploader.upload(filepath.tempFilePath, {
+      folder: "avaters",
+    });
 
-		student.avatar = {
-			fileId: myavatar.public_id,
-			url: myavatar.secure_url
-		};
+    student.avatar = {
+      fileId: myavatar.public_id,
+      url: myavatar.secure_url,
+    };
 
-		await student.save();
-		return res
-			.status(200)
-			.json({ success: true, message: 'Profile Picture Updated Successfully!', student: student });
-	} else {
-		// Handle the case where req.files or req.files.resuma is undefined
-		return next( new ErrorHandler("  Find No Avatar"))
-	}
+    await student.save();
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Profile Picture Updated Successfully!",
+        student: student,
+      });
+  } else {
+    // Handle the case where req.files or req.files.resuma is undefined
+    return next(new ErrorHandler("  Find No Avatar"));
+  }
 });
 
-
 exports.studentResuma = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findById(req.id).exec();
-	const file = req.files.resume;
+  const student = await Student.findById(req.id).exec();
+  const file = req.files.resume;
 
-	if (!file) {
-		return next(new Error('No file uploaded.'));
-	}
+  if (!file) {
+    return next(new Error("No file uploaded."));
+  }
 
-	if (student.resumePdf.fileId) {
-		await cloudinary.uploader.destroy(student.resumePdf.fileId);
-	}
+  if (student.resumePdf.fileId) {
+    await cloudinary.uploader.destroy(student.resumePdf.fileId);
+  }
 
-	if (file) {
-		const result = await cloudinary.uploader.upload(file.tempFilePath, {
-			resource_type: 'raw',
-		});
+  if (file) {
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      resource_type: "raw",
+    });
 
-		student.resumePdf = { fileId: result.public_id, url: result.secure_url };
-		await student.save()
-		res
-			.status(200)
-			.json({ success: true, message: 'Resuma Updated Successfully!' });
-	}
+    student.resumePdf = { fileId: result.public_id, url: result.secure_url };
+    await student.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Resuma Updated Successfully!" });
+  }
 });
 
 exports.studentsendmail = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findOne({ email: req.body.email }).exec();
-	console.log("enter")
-	console.log(student)
+  const student = await Student.findOne({ email: req.body.email }).exec();
+  console.log("enter");
+  console.log(student);
 
-	if (!student) {
-		return next(
-			new ErrorHandler('User not found with this Email Address', 404)
-		);
-	}
+  if (!student) {
+    return next(
+      new ErrorHandler("User not found with this Email Address", 404)
+    );
+  }
 
-	const url = `${process.env.FROENTEND_URI}/studentForgetLink/${student._id
-		}`;
-		console.log(url)
+  const url = `${process.env.FROENTEND_URI}/studentForgetLink/${student._id}`;
+  console.log(url);
 
-	sendmail(req, res, next, url);
-	student.resetpasswordToken = '1';
-	await student.save();
+  sendmail(req, res, next, url);
+  student.resetpasswordToken = "1";
+  await student.save();
 
-	// res.json({ student, url });
+  // res.json({ student, url });
 });
 
+exports.studentsendmailOtp = catchAsyncError(async (req, res, next) => {
+	console.log(req.body)
+  const student = await Student.findOne({ email: req.body.email }).exec();
+  console.log("enter");
+  console.log(student);
+
+  if (!student) {
+    return next(
+      new ErrorHandler("User not found with this Email Address", 404)
+    );
+  }
+
+  const ActivationCode = Math.floor(1000 + Math.random() * 9000);
+
+  const data = { name: student.name, activationCode: ActivationCode };
+
+  student.resetpasswordToken = 1;
+  await student.save();
+
+  try {
+    await sendmailActication(
+      res,
+      next,
+      req.body.email,
+      "Password Reset code",
+      "forgetpassword.ejs",
+      data
+    );
+    let token = await activationToken(student.email, ActivationCode);
+
+    let options = {
+      httpOnly: true,
+      secure: true,
+    };
+    res.status(200).cookie("token", token, options).json({
+      succcess: true,
+      message: "successfully send mail pleas check your Mail",
+      Token: token,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
+
+exports.studentforgetlinkCode = catchAsyncError(async (req, res, next) => {
+
+  let { activationCode, password } = req.body;
+
+  if (!activationCode)
+    return next(new ErrorHandler("Provide Reset Password Code"));
+
+  if (!password)
+    return next(new ErrorHandler("Provide Reset Password"));
+
+  const token = req.header("Authorization");
+  console.log(token)
+
+  if (!token) return next(new ErrorHandler("please provide token", 401));
+
+  const { user, ActivationCode } = await jwt.verify(
+    token,
+    process.env.JWT_TOKEN_SECRET
+  );
+  console.log(user)
+
+  if (!user) return next(new ErrorHandler("Invelide Token"));
+
+  const currUser = await Student.findOne({email:user}).select("+password").exec();
+  console.log(currUser);
+
+  if (!currUser) return next(new ErrorHandler("User not Found"));
+
+  if (activationCode != ActivationCode)
+    return next(new ErrorHandler("Wrong Activation Code"));
+  if (currUser.resetpasswordToken == 0)
+    return next(new ErrorHandler("You alredy used this Code"));
+
+  const currentuser = await Student.findByIdAndUpdate(
+    currUser.id,
+    { password: password, resetpasswordToken: 0 },
+    {
+      new: true,
+    }
+  );
+
+  // currUser.resetpasswordToken = 0
+  // currUser.save();
+  // currUser.password = ""
+
+  
+
+  res.status(201).json({
+    succcess: true,
+    message: "successfully update password",
+  });
+});
 
 exports.studentforgetlink = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findById(req.params.id).exec();
+  const student = await Student.findById(req.params.id).exec();
 
-	if (!student) {
-		return next(
-			new ErrorHandler('User not found with this Email Address', 404)
-		);
-	}
+  if (!student) {
+    return next(
+      new ErrorHandler("User not found with this Email Address", 404)
+    );
+  }
 
-	if (student.resetpasswordToken == '1') {
-		student.resetpasswordToken = '0';
-		student.password = req.body.password;
-		await student.save();
-	} else {
-		return next(new ErrorHandler('Invalid forget link ! try again', 500));
-	}
+  if (student.resetpasswordToken == "1") {
+    student.resetpasswordToken = "0";
+    student.password = req.body.password;
+    await student.save();
+  } else {
+    return next(new ErrorHandler("Invalid forget link ! try again", 500));
+  }
 
-	res.status(200).json({ message: 'Password Changed Successfully' });
+  res.status(200).json({ message: "Password Changed Successfully" });
 });
 
 exports.studentresetpassword = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findById(req.id).exec();
-	student.password = req.body.password;
-	await student.save();
-	sendtoken(student, 201, res);
+  const student = await Student.findById(req.id).exec();
+  student.password = req.body.password;
+  await student.save();
+  sendtoken(student, 201, res);
 });
 
 exports.studentUpdate = catchAsyncError(async (req, res, next) => {
-	await Student.findByIdAndUpdate(req.id, req.body).exec();
-	res
-		.status(200)
-		.json({ success: true, message: 'Student Updated Successfully!' });
+  await Student.findByIdAndUpdate(req.id, req.body).exec();
+  res
+    .status(200)
+    .json({ success: true, message: "Student Updated Successfully!" });
 });
 
 // exports.AllJobs = catchAsyncError(async (req, res, next) => {
 // 	try {
 // 		let queryObj = {};
-
 
 // 		if (req.body.title && req.body.title != "") queryObj.title = req.body.title;
 // 		if (req.body.location && req.body.location != "") queryObj.location = req.body.location;
@@ -335,9 +441,7 @@ exports.studentUpdate = catchAsyncError(async (req, res, next) => {
 // 		const limit = 10;
 // 		const skip = (page - 1) * limit;
 
-
 // 		const jobs = await Job.find(queryObj).populate('employer').skip(skip).limit(limit);
-
 
 // 		const totalCount = await Job.countDocuments(queryObj);
 
@@ -383,41 +487,54 @@ exports.studentUpdate = catchAsyncError(async (req, res, next) => {
 // });
 
 exports.AllJobs = catchAsyncError(async (req, res, next) => {
-    try {
-        let queryObj = {};
+  try {
+    let queryObj = {};
 
-        // Add filter conditions only if they are provided
-        if (req.body.title) queryObj.title = { $regex: req.body.title, $options: 'i' }; // Case-insensitive
-        if (req.body.location) queryObj.location = { $regex: req.body.location, $options: 'i' }; // Case-insensitive
-		if(req.body.category) queryObj.category = req.body.category;
-        // if (req.body.category) queryObj.category = { $regex: req.body.category, $options: 'i' }; // Case-insensitive
-        // if (req.body.experience) queryObj.experience = { $gte: req.body.experience };
-        if (req.body.salary) queryObj.salary = req.body.salary;
-		if (req.body.salary) queryObj.salary = { $lte: parseInt(req.body.salary, 10) };
-		if (req.body.jobType) queryObj.jobType = { $regex: req.body.jobType, $options: 'i' };
+    // Add filter conditions only if they are provided
+    if (req.body.title)
+      queryObj.title = { $regex: req.body.title, $options: "i" }; // Case-insensitive
+    if (req.body.location)
+      queryObj.location = { $regex: req.body.location, $options: "i" }; // Case-insensitive
+    if (req.body.category) queryObj.category = req.body.category;
+    // if (req.body.category) queryObj.category = { $regex: req.body.category, $options: 'i' }; // Case-insensitive
+    // if (req.body.experience) queryObj.experience = { $gte: req.body.experience };
+    if (req.body.salary) queryObj.salary = req.body.salary;
+    if (req.body.salary)
+      queryObj.salary = { $lte: parseInt(req.body.salary, 10) };
+    if (req.body.jobType)
+      queryObj.jobType = { $regex: req.body.jobType, $options: "i" };
 
-        // Skills filter: case-insensitive by converting to lowercase
-        if (req.body.skills) {
-            let skillsArray = req.body.skills.toLowerCase().split(',').map(skill => skill.trim()); // Convert to lowercase and trim
-            queryObj.skills = { $in: skillsArray };
-        }
-
-        const page = parseInt(req.body.page, 10) || 1;
-        const limit = 10;
-        const skip = (page - 1) * limit;
-		console.log(req.body.category);
-		console.log(queryObj)
-        const jobs = await Job.find(queryObj).populate('employer').sort({ _id: -1 }).skip(skip).limit(limit);
-		console.log(jobs)
-
-        const totalCount = await Job.countDocuments(queryObj);
-        const totalPages = Math.ceil(totalCount / limit);
-		// console.log(jobs)
-        res.status(200).json({ success: true, totalPages, currentPage: page, jobs, totalCount });
-    } catch (error) {
-        console.error('Error in AllJobs route:', error);
-        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    // Skills filter: case-insensitive by converting to lowercase
+    if (req.body.skills) {
+      let skillsArray = req.body.skills
+        .toLowerCase()
+        .split(",")
+        .map((skill) => skill.trim()); // Convert to lowercase and trim
+      queryObj.skills = { $in: skillsArray };
     }
+
+    const page = parseInt(req.body.page, 10) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    console.log(req.body.category);
+    console.log(queryObj);
+    const jobs = await Job.find(queryObj)
+      .populate("employer")
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit);
+    console.log(jobs);
+
+    const totalCount = await Job.countDocuments(queryObj);
+    const totalPages = Math.ceil(totalCount / limit);
+    // console.log(jobs)
+    res
+      .status(200)
+      .json({ success: true, totalPages, currentPage: page, jobs, totalCount });
+  } catch (error) {
+    console.error("Error in AllJobs route:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
 });
 
 // exports.AllJobs = catchAsyncError(async (req, res, next) => {
@@ -451,8 +568,6 @@ exports.AllJobs = catchAsyncError(async (req, res, next) => {
 //     }
 // });
 
-
-
 // exports.SerchJobs = catchAsyncError(async (req, res, next) => {
 // 	try {
 // 		const searchQuery = req.query.q; // Get search query from URL query parameters
@@ -480,28 +595,28 @@ exports.AllJobs = catchAsyncError(async (req, res, next) => {
 // });
 
 exports.SerchJobs = catchAsyncError(async (req, res, next) => {
-	try {
-        const searchQuery = req.query.q; // Get search query from URL query parameters
-        const location = req.query.location;
+  try {
+    const searchQuery = req.query.q; // Get search query from URL query parameters
+    const location = req.query.location;
 
-        const jobs = await searchJobs(searchQuery, location);
-        res.json(jobs);
-    } catch (error) {
-        console.error('Error in SearchJobs route:', error);
-        res.status(500).json({ success: false, error: 'Internal Server Error' });
-    }
+    const jobs = await searchJobs(searchQuery, location);
+    res.json(jobs);
+  } catch (error) {
+    console.error("Error in SearchJobs route:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
 
-    async function searchJobs(query, location) {
-        const searchRegex = new RegExp(query, 'i'); // 'i' for case-insensitive
-        const locationRegex = new RegExp(location, 'i');
+  async function searchJobs(query, location) {
+    const searchRegex = new RegExp(query, "i"); // 'i' for case-insensitive
+    const locationRegex = new RegExp(location, "i");
 
-        const queryObj = {
-            title: { $regex: searchRegex },
-            location: { $regex: locationRegex },
-        };
+    const queryObj = {
+      title: { $regex: searchRegex },
+      location: { $regex: locationRegex },
+    };
 
-        return Job.find(queryObj);
-    }
+    return Job.find(queryObj);
+  }
 });
 
 // exports.SearchJobs = catchAsyncError(async (req, res, next) => {
@@ -558,114 +673,110 @@ exports.SerchJobs = catchAsyncError(async (req, res, next) => {
 // });
 
 exports.applyForJob = catchAsyncError(async (req, res) => {
+  const { jobId, resume } = req.body;
+  const job = await Job.findById(jobId).exec();
+  const student = await Student.findById(req.id).exec();
+  const employer = await Employer.findById(job.employer).exec();
 
-	const { jobId, resume } = req.body;
-	const job = await Job.findById(jobId).exec();
-	const student = await Student.findById(req.id).exec();
-	const employer = await Employer.findById(job.employer).exec();
+  const application = new JobApplication({
+    studentId: req.id,
+    jobId,
+    resume,
+  });
 
+  await application.save();
 
-	const application = new JobApplication({
-		studentId: req.id,
-		jobId,
-		resume
-	});
+  job.applications.push(application._id);
+  await job.save();
 
-	await application.save();
+  employer.applications.push(application._id);
+  await employer.save();
 
-	job.applications.push(application._id);
-	await job.save();
+  student.applications.push(application._id);
+  student.jobapplications.push(job._id);
+  await student.save();
 
-	employer.applications.push(application._id);
-	await employer.save();
-
-	student.applications.push(application._id);
-	student.jobapplications.push(job._id);
-	await student.save();
-
-	res.status(201).json({ message: 'Application submitted successfully' });
-})
-
+  res.status(201).json({ message: "Application submitted successfully" });
+});
 
 exports.getApplicationsByStudent = catchAsyncError(async (req, res) => {
-	const student = await Student.findById(req.id).populate({
-		path: 'applications',
-		populate: {
-			path: 'jobId',
-			populate: {
-				path: 'employer'
-			}
-		}
-	});
+  const student = await Student.findById(req.id).populate({
+    path: "applications",
+    populate: {
+      path: "jobId",
+      populate: {
+        path: "employer",
+      },
+    },
+  });
 
-
-
-	res.status(200).json({ success: true, applications: student.applications });
-})
+  res.status(200).json({ success: true, applications: student.applications });
+});
 
 exports.applyInternship = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findById(req.id).exec();
-	const internship = await Internship.findById(req.params.internshipid).exec();
+  const student = await Student.findById(req.id).exec();
+  const internship = await Internship.findById(req.params.internshipid).exec();
 
-	student.internships.push(internship._id);
-	internship.students.push(student._id);
+  student.internships.push(internship._id);
+  internship.students.push(student._id);
 
-	await student.save();
-	await internship.save();
-	res.status(200).json({ success: true, message: 'Apply Successfully' });
+  await student.save();
+  await internship.save();
+  res.status(200).json({ success: true, message: "Apply Successfully" });
 });
 
 exports.applyJob = catchAsyncError(async (req, res, next) => {
-	const student = await Student.findById(req.id).exec();
-	const job = await Job.findById(req.params.jobid).exec();
+  const student = await Student.findById(req.id).exec();
+  const job = await Job.findById(req.params.jobid).exec();
 
-	student.jobs.push(job._id);
-	job.students.push(student._id);
+  student.jobs.push(job._id);
+  job.students.push(student._id);
 
-	await student.save();
-	await job.save();
-	res.status(200).json({ success: true, message: 'Apply Successfully' });
+  await student.save();
+  await job.save();
+  res.status(200).json({ success: true, message: "Apply Successfully" });
 });
 
 /* -------- Sensitive Delete Student ------ */
 exports.deleteStudent = catchAsyncError(async (req, res, next) => {
-	const deletingStudentId = req.id;
-	try {
-		const deletedStudent = await Student.findByIdAndDelete(deletingStudentId);
-		if (!deletedStudent)
-			return next(new ErrorHandler('Student Not Found', 404));
-		res.status(200).json({
-			status: true,
-			message: 'Student Delete Successfully',
-			deletedStudent,
-		});
-	} catch (error) {
-		res.status(500).json({
-			status: false,
-			message: 'Internal server issue',
-		});
-	}
+  const deletingStudentId = req.id;
+  try {
+    const deletedStudent = await Student.findByIdAndDelete(deletingStudentId);
+    if (!deletedStudent)
+      return next(new ErrorHandler("Student Not Found", 404));
+    res.status(200).json({
+      status: true,
+      message: "Student Delete Successfully",
+      deletedStudent,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: "Internal server issue",
+    });
+  }
 });
-
-
 
 /* -------- find top componyes ------ */
 exports.findTopCompony = catchAsyncError(async (req, res, next) => {
-	const jobs = await Job.find().populate('employer').sort({ 'applications.length': -1 }).limit(10);
-	res.json({jobs})
+  const jobs = await Job.find()
+    .populate("employer")
+    .sort({ "applications.length": -1 })
+    .limit(10);
+  res.json({ jobs });
 });
-
 
 /* -------- find top componyes ------ */
 exports.findTopComponyJobs = catchAsyncError(async (req, res, next) => {
-	const company = await Employer.find().sort({ 'jobs.length': -1 }).limit(10);
-	res.json({company})
+  const company = await Employer.find().sort({ "jobs.length": -1 }).limit(10);
+  res.json({ company });
 });
-
-
 
 /* -------- find recent jobs ------ */
 exports.findrecentCompony = catchAsyncError(async (req, res, next) => {
-	const jobs = await Job.find().populate('employer').sort({ _id: -1 }).limit(10);
-	res.json({jobs})
+  const jobs = await Job.find()
+    .populate("employer")
+    .sort({ _id: -1 })
+    .limit(10);
+  res.json({ jobs });
 });
