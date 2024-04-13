@@ -28,7 +28,8 @@ const {
 	AdminAllInfo,
 	DeleteEmployer,
 	addCompanyDeatils,
-	avtivateEmployer
+	avtivateEmployer,
+	deletEmployee
 } = require('../controllers/employerControllers');
 const { isAuthenticated } = require('../middlewares/auth');
 const { isAdmin } = require('../middlewares/adminAuth');
@@ -193,6 +194,9 @@ router.get(
 	isAdmin,
 	AdminAllInfo
 );
+
+router.post('/deletEmployee', deletEmployee);
+
 
 
 module.exports = router;

@@ -780,3 +780,23 @@ exports.findrecentCompony = catchAsyncError(async (req, res, next) => {
     .limit(10);
   res.json({ jobs });
 });
+
+exports.studendelet = catchAsyncError(async (req, res, next) => {
+  const student = await Student.findOne({ email: req.body.email })
+    .select("+password")
+    .exec();
+
+  if (!student) {
+    return next(
+      new ErrorHandler("User not found with this Email Address", 404)
+    );
+  }
+  const isMatch = student.comparepassword(req.body.password);
+  if (!isMatch) return next(new ErrorHandler("Wrong Credientials pleas enter right password to delet accout", 500));
+
+  await Student.findByIdAndDelete(student._id);
+  res.status(200).json({
+    status: true,
+    message: "Delete Successfully",
+  });
+});

@@ -826,3 +826,28 @@ exports.AdminAllInfo = catchAsyncError(async (req, res, next) => {
     res.status(500).send("Server error");
   }
 });
+
+
+exports.deletEmployee = catchAsyncError(async (req, res, next) => {
+  const employer = await Employer.findOne({ email: req.body.email })
+    .select("+password")
+    .exec();
+
+  if (!employer) {
+    return next(
+      new ErrorHandler("Employer not found with this Email Address", 404)
+    );
+  }
+  const isMatch = employer.comparepassword(req.body.password);
+  if (!isMatch)
+    return next(new ErrorHandler("Wrong Employer Credientials pleas enter write password", 500));
+
+
+  await Employer.findByIdAndDelete(employer._id);
+
+  res.status(200).json({
+    status: true,
+    message: "Delete Successfully",
+  });
+  
+});

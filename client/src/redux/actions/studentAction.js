@@ -325,3 +325,32 @@ export const avatarStudent = (fileData) => async (dispatch) => {
     );
   }
 };
+
+export const deletUser = (user) => async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+    const { data } = await axios.post(`${basePath}/deletUser`, {
+      ...user,
+    });
+    dispatch(setLoading(false));
+    toast.success("Deleted User")
+    
+  } catch (error) {
+    console.error(error);
+    dispatch(setLoading(false));
+    toast.error(errorMessage, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    dispatch(
+      setError(
+        error?.response?.data?.message || "failed to upload a new avatar"
+      )
+    );
+  }
+};
