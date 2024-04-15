@@ -362,19 +362,11 @@ exports.studentforgetlinkCode = catchAsyncError(async (req, res, next) => {
   if (currUser.resetpasswordToken == 0)
     return next(new ErrorHandler("You alredy used this Code"));
 
-  const currentuser = await Student.findByIdAndUpdate(
-    currUser.id,
-    { password: password, resetpasswordToken: 0 },
-    {
-      new: true,
-    }
-  );
+  const currentuser = await Student.findById(currUser._id).select("+password").exec();
+  currentuser.password = password ;
+  currentuser.resetpasswordToken = 0;
+  currentuser.save();
 
-  // currUser.resetpasswordToken = 0
-  // currUser.save();
-  // currUser.password = ""
-
-  
 
   res.status(201).json({
     succcess: true,
@@ -677,6 +669,9 @@ exports.applyForJob = catchAsyncError(async (req, res) => {
   const job = await Job.findById(jobId).exec();
   const student = await Student.findById(req.id).exec();
   const employer = await Employer.findById(job.employer).exec();
+
+  const applyed = student.jobapplications.find((jobcurrId) => jobcurrId == jobId  )
+  if(applyed) return next(new ErrorHandler("you have already applied", 400));
 
   const application = new JobApplication({
     studentId: req.id,
