@@ -306,6 +306,92 @@ exports.employersendmail = catchAsyncError(async (req, res, next) => {
   res.json({ employer, url });
 });
 
+exports.employeesendmailOtp = catchAsyncError(async (req, res, next) => {
+	console.log(req.body)
+  const employee = await Employer.findOne({ email: req.body.email }).exec();
+
+  if (!employee) {
+    return next(
+      new ErrorHandler("User not found with this Email Address", 404)
+    );
+  }
+
+  const ActivationCode = Math.floor(1000 + Math.random() * 9000);
+
+  const data = { name: employee.name, activationCode: ActivationCode };
+
+  employee.resetpasswordToken = 1;
+  await employee.save();
+
+  try {
+    await sendmailActication(
+      res,
+      next,
+      req.body.email,
+      "Password Reset code",
+      "forgetpassword.ejs",
+      data
+    );
+    let token = await activationToken(employee.email, ActivationCode);
+
+    let options = {
+      httpOnly: true,
+      secure: true,
+    };
+    res.status(200).cookie("token", token, options).json({
+      succcess: true,
+      message: "successfully send mail pleas check your Mail",
+      Token: token,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
+
+exports.employeeforgetlinkCode = catchAsyncError(async (req, res, next) => {
+
+  let { activationCode, password } = req.body;
+
+  if (!activationCode)
+    return next(new ErrorHandler("Provide Reset Password Code"));
+
+  if (!password)
+    return next(new ErrorHandler("Provide Reset Password"));
+
+  const token = req.header("Authorization");
+  console.log(token)
+
+  if (!token) return next(new ErrorHandler("please provide token", 401));
+
+  const { user, ActivationCode } = await jwt.verify(
+    token,
+    process.env.JWT_TOKEN_SECRET
+  );
+
+  if (!user) return next(new ErrorHandler("Invelide Token"));
+
+  const currUser = await Employer.findOne({email:user}).select("+password").exec();
+  console.log(currUser);
+
+  if (!currUser) return next(new ErrorHandler("User not Found"));
+
+  if (activationCode != ActivationCode)
+    return next(new ErrorHandler("Wrong Activation Code"));
+  if (currUser.resetpasswordToken == 0)
+    return next(new ErrorHandler("You alredy used this Code"));
+
+  const currentuser = await Employer.findById(currUser._id).select("+password").exec();
+  currentuser.password = password ;
+  currentuser.resetpasswordToken = 0;
+  currentuser.save();
+
+
+  res.status(201).json({
+    succcess: true,
+    message: "successfully update password",
+  });
+});
+
 exports.employerforgetlink = catchAsyncError(async (req, res, next) => {
   const employer = await Employer.findById(req.params.id).exec();
 

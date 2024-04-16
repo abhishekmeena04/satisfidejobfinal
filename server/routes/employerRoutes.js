@@ -29,7 +29,9 @@ const {
 	DeleteEmployer,
 	addCompanyDeatils,
 	avtivateEmployer,
-	deletEmployee
+	deletEmployee,
+	employeesendmailOtp,
+	employeeforgetlinkCode
 } = require('../controllers/employerControllers');
 const { isAuthenticated } = require('../middlewares/auth');
 const { isAdmin } = require('../middlewares/adminAuth');
@@ -79,6 +81,11 @@ router.post('/job/applicationstatus',isAuthenticated,applicationsStatus)
 
 // POST /employer/send-mail
 router.post('/send-mail', employersendmail);
+
+router.post('/employee/forget-password/email', employeesendmailOtp);
+
+// GET /student/forget-link/:studentId
+router.post('/employee/forget-password/code', employeeforgetlinkCode);
 
 
 // GET /employer/forget-link/:studentId
