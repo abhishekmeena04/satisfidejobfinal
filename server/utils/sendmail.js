@@ -10,10 +10,14 @@ let sendmailActication = async (res , next , email, subject, template, data) =>{
         service:"gmail",
         host: "smtp.gmail.com",
         port: 587,
+        // auth: {
+        //   user: process.env.MAIL_EMAIL_ADDRESS,
+        //   pass:  process.env.MAIL_EMAIL_PASSWORD,
+        // },
         auth: {
-          user: process.env.MAIL_EMAIL_ADDRESS,
-          pass:  process.env.MAIL_EMAIL_PASSWORD,
-        },
+            user: "satisfiedjob4u@gmail.com",
+            pass:  "ehog gojy pfil inuc",
+          },
     });
     console.log("called")
 
