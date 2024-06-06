@@ -273,26 +273,26 @@ export const updateStatus = (requestData) => async (dispatch) => {
 };
 
 
-export const deletedEmployer = (employe) => async (dispatch) => {
-    try {
-        dispatch(setLoading(true));
-        const { data } = await axios.post(`${basePath}/deletEmployee`, {
-            ...employe,
-        });
-        dispatch(setLoading(false));
-        dispatch(setLoading(false));
-        toast.success("Deleted User")
-    } catch (error) {
-        dispatch(setLoading(false));
-        dispatch(setError(error?.response?.data?.message || "Update status failed"));
-        toast.error(errorMessage, {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-    }
-};
+// export const deletedEmployer = (employe) => async (dispatch) => {
+//     try {
+//         dispatch(setLoading(true));
+//         const { data } = await axios.post(`${basePath}/deletEmployee`, {
+//             ...employe,
+//         });
+//         dispatch(setLoading(false));
+//         dispatch(setLoading(false));
+//         toast.success("Deleted User")
+//     } catch (error) {
+//         dispatch(setLoading(false));
+//         dispatch(setError(error?.response?.data?.message || "Update status failed"));
+//         toast.error(errorMessage, {
+//             position: "top-right",
+//             autoClose: 5000,
+//             hideProgressBar: false,
+//             closeOnClick: true,
+//             pauseOnHover: true,
+//             draggable: true,
+//             progress: undefined,
+//           });
+//     }
+// };
