@@ -129,5 +129,10 @@ router.post(
 	isAuthenticated,
 	deleteaccomplishment
 );
-
+//POST DELETE ACCOMPLISHMENTS AND SERVICES
+router.post(
+	'/delete-accomplishment/:accomplishmentid',
+	isAuthenticated,
+	deleteaccomplishment
+);
 module.exports = router;
