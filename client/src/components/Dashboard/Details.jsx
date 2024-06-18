@@ -34,7 +34,7 @@ const Details = ({ id, setTab }) => {
 
               <div className="flex justify-between mb-4">
                 <div>
-                  <h1 className="text-lg font-semibold">{job?.title}</h1>
+                  <h1 className="text-lg font-bold">{job?.title}</h1>
                   <p className="text-sm text-gray-500">{job?.employer?.organisationname}</p>
                 </div>
                 <img src={job?.employer?.organisationlogo?.url} className="h-12" alt="" />
