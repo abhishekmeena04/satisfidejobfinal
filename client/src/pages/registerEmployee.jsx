@@ -89,7 +89,7 @@ const RegisterEmployee = () => {
               <div className="w-[16px] h-[16px] flex  items-center justify-center rounded-full bg-[#C8C2C9]">
                 <TiTick className="text-[#37283A]" />
               </div>
-              <p>Cost Effective Recruiting</p>
+              <p>Cost Effective Recruiting's</p>
             </div>
           </div>
         </div>
