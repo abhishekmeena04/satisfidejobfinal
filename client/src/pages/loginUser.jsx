@@ -76,13 +76,13 @@ const LoginUser = () => {
               <div className="w-[16px] h-[16px] flex  items-center justify-center rounded-full bg-[#C8C2C9]">
                 <TiTick className="text-[#37283A]" />
               </div>
-              <p>Access Exclusive Job Listings</p>
+              <p>Access Exclusive Job Listing's</p>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-[16px] h-[16px] flex  items-center justify-center rounded-full bg-[#C8C2C9]">
                 <TiTick className="text-[#37283A]" />
               </div>
-              <p>Personalized Job Recommendations</p>
+              <p>Personalized Job Recommendation's</p>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-[16px] h-[16px] flex  items-center justify-center rounded-full bg-[#C8C2C9]">
