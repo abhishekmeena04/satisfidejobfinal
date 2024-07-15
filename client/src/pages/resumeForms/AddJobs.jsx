@@ -35,7 +35,7 @@ const AddJob = () => {
     
       <div className="  m-auto mt-16 w-[370px] sm:w-[300px] flex justify-center items-center">
         <form className="w-full flex flex-col " action="" method="Post" onSubmit={hendelSubmit}>
-          <h1 className=" text-2xl text-gray-800 text-center py-10">Add Job Details</h1>
+          <h1 className=" text-2xl text-gray-800 text-center py-10">Add Job Detail's</h1>
           <label  className="flex flex-col w-1/2 font-medium">
           profile
             <input className="mt-1 block px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" type="text" name="profile" id="jobone" value={profile} placeholder="Ex: Operation" 
